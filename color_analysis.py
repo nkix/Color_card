@@ -46,16 +46,15 @@ def color_classify(rgb, image, name):
     if 0 <= v <= 46:
         path = 'classification/black/' + name
         cv.imwrite(path, image)
-    # grey
-    elif 0 <= s <= 43:
-        path = 'classification/grey/' + name
-        cv.imwrite(path, image)
     # white
     elif (0 <= s <= 30) and (221 <= v <= 255):
         path = 'classification/white/' + name
         cv.imwrite(path, image)
+    # grey
+    elif 0 <= s <= 43:
+        path = 'classification/grey/' + name
+        cv.imwrite(path, image)
     elif 43 <= s <= 255:
-        print("h=" + str(h))
         # orange
         if 11 <= h <= 25:
             path = 'classification/orange/' + name
@@ -121,6 +120,16 @@ def color_analyze(image, k, color_max=15, show_rgb_value=False, isobj=False):
     counter = collections.Counter(label.flatten())
     sorted_count = counter.most_common(k)
 
+    # check if black background should be replaced
+    if isobj:
+        for items in sorted_count:
+            color = center[items[0]].tolist()
+            # if black
+            if color[0] == 0 and color[1] == 0 and color[2] == 0:
+                sorted_count.remove(items)
+                break
+        k -= 1
+
     # draw color card
     desired_height = image.shape[0]
     desired_width = 150
@@ -130,41 +139,35 @@ def color_analyze(image, k, color_max=15, show_rgb_value=False, isobj=False):
     color_card = np.ones((desired_height, desired_width, 3), dtype='uint8') * 255
     start = 0
 
-    # number of pixels
-    total = image.shape[0] * image.shape[1]
+    # number of pixels of colors in card
+    total = 0
+    for items in sorted_count:
+        total += items[1]
+
     r_sum = 0
     g_sum = 0
     b_sum = 0
-    count = 0
-    replace = False  # if there is black removed from card
 
     for items in sorted_count:
-        if isobj and (count == k-1) and not replace:
-            break
         end = start + height_colors
         # draw rectangle filled with color
-        color = center[items[0]].tolist()
-        if isobj and color[0] == 0 and color[1] == 0 and color[2] == 0:
-            replace = True
-            continue
         cv2.rectangle(color_card, (0, int(start)), (width_colors, int(end)), center[items[0]].tolist(), -1)
 
-        if count < k//2 and count < color_max:
-            normalized = items[1]/total
-            r_sum += color_card[int(start), 0, 2] * normalized
-            g_sum += color_card[int(start), 0, 1] * normalized
-            b_sum += color_card[int(start), 0, 0] * normalized
+        r = color_card[int(start), 0, 2]
+        g = color_card[int(start), 0, 1]
+        b = color_card[int(start), 0, 0]
+
+        normalized = items[1]/total
+        r_sum += (r * normalized)
+        g_sum += (g * normalized)
+        b_sum += (b * normalized)
 
         if show_rgb_value:
             # write RGB value of color
-            r = color_card[int(start), 0, 2]
-            g = color_card[int(start), 0, 1]
-            b = color_card[int(start), 0, 0]
             text = " R:" + str(r) + " G:" + str(g) + " B:" + str(b)
             cv2.putText(color_card, text, (0, int(start+height_colors/2)), cv.FONT_HERSHEY_PLAIN, 0.7,
                         (int(255-r), int(255-g), int(255-b)), 1)
 
-        count += 1
         start = end
     rgb = [r_sum, g_sum, b_sum]
 

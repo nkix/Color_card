@@ -4,21 +4,16 @@ import numpy as np
 from color_analysis import color_analyze, color_classify
 
 
-def onmouse_pick_range(event, x, y, flags, param):
-    lx, ly, rx, ry = 0, 0, 0, 0
-    if event == cv.EVENT_LBUTTONDOWN and flags == cv.EVENT_FLAG_LBUTTON:
-        lx, ly = x, y
-    if event == cv.EVENT_LBUTTONUP:
-        rx, ry = x, y
-        if (rx > lx) and (ry > ly):
-            width = rx - lx
-            height = ry - ly
-            img_seg_grab(img, lx, ly, width, height)
-        else:
-            return 0, 0, 0, 0
-
-
 def img_seg_grab(img, lx, ly, width, height):
+    """
+    Do a image segmentation with GrabCut
+    :param img: source image
+    :param lx: top left x of rectangle
+    :param ly: top left y of rectangle
+    :param width: width of rectangle
+    :param height: height of rectangle
+    :return:
+    """
 
     # set mask, background and foreground
     mask = np.zeros(img.shape[:2], np.uint8)
@@ -35,23 +30,10 @@ def img_seg_grab(img, lx, ly, width, height):
     img_seg = img * mask2[:, :, np.newaxis]
 
     card, rgb = color_analyze(img_seg, 10, isobj=True)
-    result = np.hstack((img, card))
 
-    cv2.imshow("dst", img_seg)
-    cv.imshow('result', result)
-    cv2.waitKey(0)
+    cv.imshow("dst", img_seg)
+    cv.waitKey(0)
+    cv.destroyAllWindows()
 
-
-img = cv.imread('images/banana.jpg')
-cv.namedWindow('object range select')
-cv.setMouseCallback('object range select', onmouse_pick_range)
-
-cv.imshow('object range select', img)
-
-cv.waitKey(0)
-cv.destroyAllWindows()
-
-
-
-
+    return card, rgb
 
