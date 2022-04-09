@@ -29,11 +29,5 @@ def img_seg_grab(img, lx, ly, width, height):
     mask2 = np.where((mask == 2) | (mask == 0), 0, 1).astype('uint8')
     img_seg = img * mask2[:, :, np.newaxis]
 
-    card, rgb = color_analyze(img_seg, 10, isobj=True)
-
-    cv.imshow("dst", img_seg)
-    cv.waitKey(0)
-    cv.destroyAllWindows()
-
-    return card, rgb
+    return img_seg
 

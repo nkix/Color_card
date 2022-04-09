@@ -2,7 +2,6 @@ import cv2
 import numpy as np
 import cv2 as cv
 import collections
-import colorsys
 
 
 def color_classify(rgb, image, name):
