@@ -32,8 +32,7 @@ python color_app.py -f <image directory> -k <k value> -m <max number of colors i
 -m ：the max number of color shown in color card applied if k is larger than m, default would be 15  
 -s : use this to show specific RGB value of colors in the color card  
 -o : call a image segmentation function before color analysis  
-     with -o choosen, user will be required to draw the range of object interested  
-     Use need to press Enter to confirm the selection, and then press 0 to confirm the segmentation  
+with -o choosen, user will be required to draw the range of object interested. Use need to press Enter to confirm the selection, and then press 0 to confirm the segmentation  
 
 example:
 ```sh
